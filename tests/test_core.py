@@ -4,6 +4,42 @@ import pytest
 
 import affinekit
 
+
+def _t(tx, ty):
+    return [[1, 0, tx], [0, 1, ty], [0, 0, 1]]
+
+
+def _rot(a):
+    c, s = math.cos(a), math.sin(a)
+    return [[c, -s, 0], [s, c, 0], [0, 0, 1]]
+
+
+def _scale(sx, sy):
+    return [[sx, 0, 0], [0, sy, 0], [0, 0, 1]]
+
+
+def _persp(k):
+    # 投影矩阵：k=0.5 时 w 行为 [0.5, 0, 1]（经典透视），
+    # k=1.0 时 w 行为 [-1, 0, 1]，点 (1, 0) 处 w = 0。
+    return [[1, 0, 0], [0, 1, 0], [2 - 3 * k, 0, 1]]
+
+
+def _raises(f):
+    try:
+        f()
+    except ValueError:
+        return True
+    return False
+
+
+def _stack():
+    s = affinekit.TransformStack()
+    s.push(_t(1.5, -0.25))
+    s.push(_rot(0.3))
+    s.push(_persp(0.25))
+    return s
+
+
 def _pop_restores():
     s = affinekit.TransformStack()
     p = s.apply((1, 1))
